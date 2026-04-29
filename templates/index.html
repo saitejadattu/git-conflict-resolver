@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Call AI Agent</title>
+  <style>
+    :root {
+      --bg: #f4efe7;
+      --panel: rgba(255, 252, 247, 0.92);
+      --panel-strong: #fffdf9;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: rgba(120, 98, 76, 0.16);
+      --accent: #b45309;
+      --accent-dark: #92400e;
+      --accent-soft: #fde7c7;
+      --success: #166534;
+      --error: #b91c1c;
+      --shadow: 0 24px 60px rgba(80, 57, 30, 0.12);
+      --radius-xl: 28px;
+      --radius-lg: 18px;
+      --radius-md: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.18), transparent 34%),
+        radial-gradient(circle at right, rgba(180, 83, 9, 0.12), transparent 28%),
+        linear-gradient(180deg, #fbf7f1 0%, var(--bg) 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 48px 20px 56px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .hero-card,
+    .panel {
+      background: var(--panel);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card {
+      padding: 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 220px;
+      height: 220px;
+      right: -60px;
+      top: -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(180, 83, 9, 0.18), transparent 68%);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 18px 0 14px;
+      font-size: clamp(2.4rem, 5vw, 4.4rem);
+      line-height: 0.95;
+      font-weight: 700;
+    }
+
+    .hero-text {
+      max-width: 620px;
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 1.02rem;
+      line-height: 1.7;
+    }
+
+    .hero-points {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hero-points li {
+      padding: 10px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      font-size: 0.95rem;
+    }
+
+    .status-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .status-label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 10px;
+    }
+
+    .status-box {
+      min-height: 120px;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      font-size: 0.98rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .status-box.is-idle {
+      color: var(--muted);
+    }
+
+    .status-box.is-success {
+      color: var(--success);
+    }
+
+    .status-box.is-error {
+      color: var(--error);
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    .panel {
+      padding: 28px;
+    }
+
+    .panel h2 {
+      margin: 0 0 8px;
+      font-size: 1.7rem;
+    }
+
+    .panel-copy {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 0.96rem;
+      font-weight: 700;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    input[type="tel"] {
+      width: 100%;
+      padding: 16px 18px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    input[type="tel"]:focus {
+      border-color: rgba(180, 83, 9, 0.45);
+      box-shadow: 0 0 0 4px rgba(180, 83, 9, 0.12);
+    }
+
+    button {
+      border: 0;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    button:hover:enabled {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: wait;
+      opacity: 0.7;
+    }
+
+    .primary-btn {
+      padding: 16px 20px;
+      min-width: 156px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+      color: #fff;
+      font-size: 0.98rem;
+      font-weight: 700;
+      box-shadow: 0 16px 28px rgba(180, 83, 9, 0.22);
+    }
+
+    .secondary-btn {
+      padding: 12px 16px;
+      background: #fff;
+      color: var(--text);
+      border: 1px solid var(--line);
+      font-weight: 700;
+    }
+
+    .helper {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .calls-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .calls-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .call-item,
+    .empty-state {
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+    }
+
+    .call-item {
+      display: grid;
+      gap: 12px;
+    }
+
+    .call-main {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .call-main strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .call-meta {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    .call-sid {
+      margin-top: 4px;
+      font-family: "Courier New", monospace;
+      font-size: 0.84rem;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .view-btn {
+      padding: 10px 14px;
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .empty-state {
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .modal[hidden] {
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.52);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      z-index: 50;
+    }
+
+    .modal-card {
+      width: min(760px, 100%);
+      max-height: 84vh;
+      overflow: auto;
+      padding: 24px;
+      border-radius: var(--radius-xl);
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .transcript-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .transcript-item {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .transcript-item.role-agent {
+      background: #fff7ed;
+    }
+
+    .transcript-role {
+      margin-bottom: 6px;
+      font-size: 0.83rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent-dark);
+    }
+
+    .transcript-text {
+      line-height: 1.7;
+    }
+
+    .transcript-time {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero,
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .page {
+        padding-top: 24px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-card,
+      .panel,
+      .status-card {
+        padding: 22px;
+      }
+
+      .input-row,
+      .call-main,
+      .calls-topbar,
+      .modal-topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .primary-btn,
+      .secondary-btn,
+      .view-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <article class="hero-card">
+        <div class="eyebrow">Voice Demo Workspace</div>
+        <h1>Launch an AI-assisted call from your browser.</h1>
+        <p class="hero-text">
+          Start outbound calls, watch status updates, and review transcript entries in one clean dashboard.
+        </p>
+        <ul class="hero-points">
+          <li>Outbound call trigger</li>
+          <li>Recent call history</li>
+          <li>Transcript lookup</li>
+        </ul>
+      </article>
+
+      <aside class="hero-card status-card">
+        <div>
+          <div class="status-label">Live status</div>
+          <div id="status" class="status-box is-idle">Waiting for your first action.</div>
+        </div>
+        <p class="helper">Use full international format like <strong>+919876543210</strong>.</p>
+      </aside>
+    </section>
+
+    <section class="content">
+      <article class="panel">
+        <h2>Start a Call</h2>
+        <p class="panel-copy">
+          Enter the destination number and send a call request through the current backend configuration.
+        </p>
+
+        <form id="callForm">
+          <label class="field-label" for="phone">Phone number</label>
+          <div class="input-row">
+            <input id="phone" type="tel" placeholder="+919876543210" inputmode="tel" autocomplete="tel" required>
+            <button class="primary-btn" id="callButton" type="submit">Call Now</button>
+          </div>
+          <p class="helper">Numbers should use E.164 format with a leading `+` and country code.</p>
+        </form>
+      </article>
+
+      <article class="panel">
+        <div class="calls-topbar">
+          <div>
+            <h2>Recent Calls</h2>
+            <p class="panel-copy">Review recent call attempts and open stored transcript entries.</p>
+          </div>
+          <button class="secondary-btn" id="refreshCalls" type="button">Refresh</button>
+        </div>
+        <div id="callsList" class="calls-list"></div>
+      </article>
+    </section>
+  </main>
+
+  <section id="transcriptModal" class="modal" hidden>
+    <div class="modal-card">
+      <div class="modal-topbar">
+        <div>
+          <h3 class="modal-title">Transcript</h3>
+          <div id="modalCallSid" class="call-sid"></div>
+        </div>
+        <button class="secondary-btn" id="closeModal" type="button">Close</button>
+      </div>
+      <div id="transcriptList" class="transcript-list"></div>
+    </div>
+  </section>
+
+  <script>
+    const phonePattern = /^\+[1-9]\d{7,14}$/;
+    const statusEl = document.getElementById("status");
+    const callForm = document.getElementById("callForm");
+    const phoneInput = document.getElementById("phone");
+    const callButton = document.getElementById("callButton");
+    const callsList = document.getElementById("callsList");
+    const refreshCallsButton = document.getElementById("refreshCalls");
+    const transcriptModal = document.getElementById("transcriptModal");
+    const transcriptList = document.getElementById("transcriptList");
+    const modalCallSid = document.getElementById("modalCallSid");
+    const closeModalButton = document.getElementById("closeModal");
+    const defaultButtonLabel = callButton.textContent;
+
+    function setStatus(message, type = "idle") {
+      statusEl.textContent = message;
+      statusEl.className = `status-box is-${type}`;
+    }
+
+    function formatTime(value) {
+      if (!value) {
+        return "Unknown time";
+      }
+
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return value;
+      }
+
+      return date.toLocaleString();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[char]));
+    }
+
+    function setLoading(isLoading) {
+      callButton.disabled = isLoading;
+      phoneInput.disabled = isLoading;
+      refreshCallsButton.disabled = isLoading;
+      callButton.textContent = isLoading ? "Starting..." : defaultButtonLabel;
+    }
+
+    async function readJsonSafely(response) {
+      const text = await response.text();
+
+      if (!text) {
+        return {};
+      }
+
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        return { message: text };
+      }
+    }
+
+    async function startCall(phone) {
+      const response = await fetch("/start-call", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone })
+      });
+      const data = await readJsonSafely(response);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to start the call.");
+      }
+
+      return data;
+    }
+
+    function renderCalls(calls) {
+      if (!Array.isArray(calls) || calls.length === 0) {
+        callsList.innerHTML = `
+          <div class="empty-state">
+            No calls have been stored yet. Start a call and it will appear here.
+          </div>
+        `;
+        return;
+      }
+
+      callsList.innerHTML = calls.map((call) => `
+        <article class="call-item">
+          <div class="call-main">
+            <div>
+              <strong>${escapeHtml(call.to_number || "Unknown number")}</strong>
+              <div class="call-meta">
+                Status: ${escapeHtml(call.status || "queued")}<br>
+                Time: ${escapeHtml(formatTime(call.start_time || call.created_at))}
+              </div>
+              <div class="call-sid">${escapeHtml(call.call_sid || "No call SID")}</div>
+            </div>
+            <button class="view-btn" type="button" data-sid="${escapeHtml(call.call_sid || "")}">
+              View Transcript
+            </button>
+          </div>
+        </article>
+      `).join("");
+
+      callsList.querySelectorAll("[data-sid]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const sid = button.dataset.sid;
+          if (!sid) {
+            setStatus("This call does not have a transcript identifier yet.", "error");
+            return;
+          }
+          await openTranscript(sid);
+        });
+      });
+    }
+
+    async function fetchCalls() {
+      const response = await fetch("/calls");
+      const data = await readJsonSafely(response);
+
+      if (!response.ok) {
+        throw new Error(data.message || "Unable to load calls.");
+      }
+
+      renderCalls(Array.isArray(data) ? data : data.calls);
+    }
+
+    async function openTranscript(callSid) {
+      modalCallSid.textContent = callSid;
+      transcriptList.innerHTML = `<div class="empty-state">Loading transcript...</div>`;
+      transcriptModal.hidden = false;
+
+      try {
+        const response = await fetch(`/transcripts/${encodeURIComponent(callSid)}`);
+        const items = await readJsonSafely(response);
+
+        if (!response.ok) {
+          throw new Error(items.message || "Unable to load transcript.");
+        }
+
+        if (!Array.isArray(items) || items.length === 0) {
+          transcriptList.innerHTML = `
+            <div class="empty-state">
+              No transcript entries have been saved for this call yet.
+            </div>
+          `;
+          return;
+        }
+
+        transcriptList.innerHTML = items.map((item) => `
+          <article class="transcript-item role-${escapeHtml(item.role || "user")}">
+            <div class="transcript-role">${escapeHtml(item.role || "speaker")}</div>
+            <div class="transcript-text">${escapeHtml(item.text || "")}</div>
+            <div class="transcript-time">${escapeHtml(formatTime(item.ts))}</div>
+          </article>
+        `).join("");
+      } catch (error) {
+        transcriptList.innerHTML = `
+          <div class="empty-state">${escapeHtml(error.message || "Unable to load transcript.")}</div>
+        `;
+      }
+    }
+
+    function closeModal() {
+      transcriptModal.hidden = true;
+      transcriptList.innerHTML = "";
+      modalCallSid.textContent = "";
+    }
+
+    callForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      const phone = phoneInput.value.trim();
+      if (!phonePattern.test(phone)) {
+        setStatus("Enter a valid E.164 phone number like +919876543210.", "error");
+        phoneInput.focus();
+        return;
+      }
+
+      setLoading(true);
+      setStatus("Starting your call request...", "idle");
+
+      try {
+        const result = await startCall(phone);
+        setStatus(result.message || "Call started successfully.", "success");
+        phoneInput.value = "";
+        await fetchCalls();
+      } catch (error) {
+        setStatus(error.message || "Unable to start the call.", "error");
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    refreshCallsButton.addEventListener("click", async () => {
+      try {
+        setStatus("Refreshing recent calls...", "idle");
+        await fetchCalls();
+        setStatus("Recent calls updated.", "success");
+      } catch (error) {
+        setStatus(error.message || "Unable to refresh calls.", "error");
+      }
+    });
+
+    closeModalButton.addEventListener("click", closeModal);
+    transcriptModal.addEventListener("click", (event) => {
+      if (event.target === transcriptModal) {
+        closeModal();
+      }
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !transcriptModal.hidden) {
+        closeModal();
+      }
+    });
+
+    fetchCalls().catch((error) => {
+      renderCalls([]);
+      setStatus(error.message || "Unable to load recent calls.", "error");
+    });
+  </script>
+</body>
+</html>
